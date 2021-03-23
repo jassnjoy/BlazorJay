@@ -1,0 +1,81 @@
+﻿
+@page  "/fetchEmployee"
+
+@using Blaz_ServerApp.Models
+@using Blaz_ServerApp.Services
+@using System.Reflection;
+
+@inject IService<Employee, int> empServ;
+
+@inject NavigationManager urlHelper
+
+
+<h3>FetchEmployee</h3>
+
+<EditForm Model="@searchemployee" OnChange="@GetEmployeeByName()">
+    <div class="container">
+
+        <div class="form-group">
+            <label>Dept Name</label>
+            <InputText class="form-control" OnChange="@GetEmployeeByName()" @bind-Value="@searchemployee.EmpName"></InputText>
+
+        </div>
+
+
+        <table class="table table-bordered table-striped">
+            <thead>
+                <tr>
+                    @foreach (PropertyInfo prop in Props)
+                    {
+                        <th>@prop.Name</th>
+                    }
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (Employee emp in employees)
+                {
+                    <tr>
+                        <td>@emp.EmpNo</td>
+                        <td>@emp.EmpName</td>
+                        <td>@emp.Designation</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+</EditForm>
+
+@code {
+    private List<Employee> employees;
+    private Employee searchemployee;
+    PropertyInfo[] Props;
+    protected override Task OnInitializedAsync()
+    {
+        employees = new List<Employee>();
+        searchemployee = new Employee();
+        Props = typeof(Employee).GetProperties(BindingFlags.Public | BindingFlags.Instance);
+        //var res = await empServ.GetAsync();
+        //employees = res.ToList();
+        return base.OnInitializedAsync();
+    }
+
+    async Task GetEmployeeByName()
+    {
+
+        // logic to fetch a new Department
+        if (searchemployee.EmpName != "")
+        {
+            var res = await empServ.GetAsync(searchemployee);
+            employees = res.ToList();
+        }
+
+    }
+
+    void ClearInputs()
+    {
+        searchemployee = new Employee();
+    }
+
+}
+

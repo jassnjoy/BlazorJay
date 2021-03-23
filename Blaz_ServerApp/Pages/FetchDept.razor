@@ -1,0 +1,80 @@
+﻿
+@page  "/fetchDept"
+
+@using Blaz_ServerApp.Models
+@using Blaz_ServerApp.Services
+@using System.Reflection;
+
+@inject IService<Department, int> deptServ;
+
+@inject NavigationManager urlHelper
+
+
+<h3>FetchDept</h3>
+
+<EditForm Model="@searchdepartment" OnChange="@GetDepartMentByName()">
+    <div class="container">
+
+        <div class="form-group">
+            <label>Dept Name</label>
+            <InputText class="form-control" OnChange="@GetDepartMentByName()" @bind-Value="@searchdepartment.DeptName"></InputText>
+
+        </div>
+
+
+        <table class="table table-bordered table-striped">
+            <thead>
+                <tr>
+                    @foreach (PropertyInfo prop in Props)
+                    {
+                        <th>@prop.Name</th>
+                    }
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (Department dept in departments)
+                {
+                    <tr>
+                        <td>@dept.DeptNo</td>
+                        <td>@dept.DeptName</td>
+                        <td>@dept.Location</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+</EditForm>
+
+@code {
+    private List<Department> departments;
+    private Department searchdepartment;
+    PropertyInfo[] Props;
+    protected override  Task OnInitializedAsync()
+    {
+        departments = new List<Department>();
+        searchdepartment = new Department();
+        Props = typeof(Department).GetProperties(BindingFlags.Public | BindingFlags.Instance);
+        //var res = await deptServ.GetAsync();
+        //departments = res.ToList();
+        return base.OnInitializedAsync();
+    }
+
+    async Task GetDepartMentByName()
+    {
+
+        // logic to fetch a new Department
+        if (searchdepartment.DeptName != "")
+        {
+            var res = await deptServ.GetAsync(searchdepartment);
+            departments = res.ToList();
+        }
+
+    }
+
+    void ClearInputs()
+    {
+        searchdepartment = new Department();
+    }
+
+}
